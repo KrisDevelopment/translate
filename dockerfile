@@ -1,19 +1,15 @@
-from transformers import pipeline
-from fastapi import FastAPI, HTTPException
-import uvicorn
+FROM python:slim-bullseye
 
-app = FastAPI()
+# Copy the web service source inside /app
+COPY /app /app
 
-# Load the translation pipeline
-translator = pipeline('translation_en_to_de', model='Helsinki-NLP/opus-mt-en-de')
+# The local work dir is /app inside the container. This is my context now.
+WORKDIR /app
 
-@app.post("/translate/")
-def translate(text: str):
-    try:
-        translation = translator(text)
-        return {"translation": translation[0]['translation_text']}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+RUN pip install --no-cache-dir flask
+RUN pip install --no-cache-dir requests
+RUN pip install googletrans==4.0.0-rc1
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+EXPOSE 80
+
+CMD [python, service.py]
