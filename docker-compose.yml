@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ai-translation:
+    image: huggingface/transformers-pytorch-cpu
+    container_name: ai-translation
+    environment:
+      - MODEL_NAME=Helsinki-NLP/opus-mt-en-de # Change this to the desired model
+    volumes:
+      - ./app:/app
+    command: python /app/run_translation.py
+    ports:
+      - "8000:8000"
+
+  # Optional: Add a web server or API service to expose the translation model
+  web:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.8
+    container_name: web
+    volumes:
+      - ./app:/app
+    depends_on:
+      - ai-translation
+    ports:
+      - "80:80"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80
