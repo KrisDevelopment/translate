@@ -1,4 +1,4 @@
-FROM python:slim-bullseye
+FROM python:3.11-slim
 
 # Copy the web service source inside /app
 COPY /app /app
